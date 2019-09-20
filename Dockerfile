@@ -6,7 +6,7 @@ WORKDIR	/root
 # Install dependencies.
 RUN	apt-get update && DEBIAN_FRONTEND=noninteractive\
 	apt-get install -y build-essential gperf bison flex texinfo wget gawk libtool automake libncurses5-dev help2man\
-		ca-certificates unzip libtool libtool-bin python3 python3-dev vim
+		ca-certificates unzip libtool libtool-bin python3 python3-dev vim ack-grep
 
 # Download and compile crosstool-NG.
 RUN	wget http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-1.24.0.tar.xz 2>&1
@@ -76,12 +76,13 @@ RUN wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_1-stable.zip 2>&
     make &&\
     make install
 
-# Get log4cpp
+# # Get log4cpp
 RUN wget https://sourceforge.net/projects/log4cpp/files/latest/download 2>&1 &&\
     tar zxvf download &&\
     rm download &&\
     cd log4cpp &&\
-    ./configure --prefix=$SYSROOT CC=armv8-rpi3-linux-gnueabihf-cc CXX=armv8-rpi3-linux-gnueabihf-g++ --host=armv8-rpi3-linux-gnueabihf --build=i686-pc-linux-gnu &&\
+    ./configure --prefix=$SYSROOT CC=armv8-rpi3-linux-gnueabihf-cc CXX=armv8-rpi3-linux-gnueabihf-g++ --host=armv8-rpi3-linux-gnueabihf &&\
+    sed -i 's|/\* #undef LOG4CPP_HAVE_SNPRINTF \*/|#ifndef LOG4CPP_HAVE_SNPRINTF\n#define LOG4CPP_HAVE_SNPRINTF  1\n#endif|g' include/log4cpp/config.h &&\
     make &&\
     make install
 
@@ -95,10 +96,10 @@ RUN wget https://github.com/nlohmann/json/archive/release/3.7.0.zip 2>&1 &&\
 # Mosquitto library
 ENV DESTDIR=$SYSROOT/..
 ENV CROSS_COMPILE=armv8-rpi3-linux-gnueabihf-
-RUN wget https://mosquitto.org/files/source/mosquitto-1.6.4.tar.gz 2>&1 &&\
-    tar xzf mosquitto-1.6.4.tar.gz &&\
-    rm mosquitto-1.6.4.tar.gz &&\
-    cd mosquitto-1.6.4/lib &&\
-    make &&\
+RUN wget https://mosquitto.org/files/source/mosquitto-1.4.10.tar.gz 2>&1 &&\
+    tar xzf mosquitto-1.4.10.tar.gz &&\
+    rm mosquitto-1.4.10.tar.gz &&\
+    cd mosquitto-1.4.10/lib &&\
+    make WITH_SRV=no WITH_UUID=no &&\
     make install
 
