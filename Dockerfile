@@ -1,4 +1,4 @@
-FROM debian:8
+FROM debian:12
 MAINTAINER Amauri <amaurialb@gmail.compile  >
 
 WORKDIR	/root
@@ -9,15 +9,15 @@ RUN	apt-get update && DEBIAN_FRONTEND=noninteractive\
 		ca-certificates unzip libtool libtool-bin python3 python3-dev vim ack-grep
 
 # Download and compile crosstool-NG.
-RUN	wget http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-1.24.0.tar.xz 2>&1
-RUN tar xf crosstool-ng-1.24.0.tar.xz
-RUN cd crosstool-ng-1.24.0 && pwd && ls -la configure &&\
+RUN	wget http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-1.26.0.tar.xz 2>&1
+RUN tar xf crosstool-ng-1.26.0.tar.xz
+RUN cd crosstool-ng-1.26.0 && pwd && ls -la configure &&\
     ./configure &&\
     make && make install
 RUN rm -rf crosstool-ng*
 
 # # Download and unpack uClibc.
-RUN	wget http://downloads.uclibc-ng.org/releases/1.0.9/uClibc-ng-1.0.9.tar.xz 2>&1 &&\
+RUN	wget http://downloads.uclibc-ng.org/releases/1.0.40/uClibc-ng-1.0.40.tar.xz 2>&1 &&\
  	tar xf uClibc-*.tar* &&\
  	rm *.tar*
 
@@ -57,10 +57,10 @@ RUN wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.60.tar.gz 2>&1 &&\
     make install
 
 # Get boost library and cross compile
-RUN wget https://sourceforge.net/projects/boost/files/boost/1.70.0/boost_1_70_0.tar.gz/download 2>&1 &&\
+RUN wget https://sourceforge.net/projects/boost/files/boost/1.81.0/boost_1_81_0.tar.gz/download 2>&1 &&\
     tar zxvf download &&\
     rm download &&\
-    cd boost_1_70_0 &&\
+    cd boost_1_81_0 &&\
     sed -i 's|if $(tag) = gcc && \[ numbers.less 4 $(version\[1\]) \]|if $(tag) = gcc|g' tools/build/src/tools/common.jam &&\   
     ./bootstrap.sh --prefix=$SYSROOT &&\
     sed -i 's|using gcc| using gcc : arm : armv8-rpi3-linux-gnueabihf-g++|g' project-config.jam &&\     
@@ -87,10 +87,10 @@ RUN wget https://sourceforge.net/projects/log4cpp/files/latest/download 2>&1 &&\
     make install
 
 # Get yaml library
-RUN wget https://github.com/nlohmann/json/archive/release/3.7.0.zip 2>&1 &&\
-    unzip 3.7.0.zip &&\
-    rm 3.7.0.zip &&\
-    cd json-release-3.7.0/single_include &&\
+RUN wget https://github.com/nlohmann/json/releases/download/v3.11.2/include.zip 2>&1 &&\
+    unzip include.zip &&\
+    rm include.zip &&\
+    cd single_include &&\
     cp -r nlohmann $SYSROOT/include/
 
 # Mosquitto library
